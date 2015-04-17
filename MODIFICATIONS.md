@@ -13,13 +13,10 @@
 
 ### FIRST-TIME GIT SETUP ###
 * See [complete details](https://pixhawk.org/dev/nuttx/building_and_flashing_console) on the Pixhawk website
-	* <pre>
-	  <code> 
-	  cd /path/to/Firmware
+	* <pre><code>cd /path/to/Firmware
 	  git clone https://github.com/drmcarthur/Firmware-branched.git
 	  git submodule init
-	  git submodule update
-	  </code></pre>
+	  git submodule update</code></pre>
 
 ### BUILD INSTRUCTIONS ###
 * First time (use -j6 to run builder with 6 threads):
