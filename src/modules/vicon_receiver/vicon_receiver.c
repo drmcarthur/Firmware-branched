@@ -174,6 +174,10 @@ int vicon_receiver_main(int argc, char *argv[])
       y /= -1000.0f;  // Y is west... need to invert to get 'East' for NED
       z /= -1000.0f;  // Z is down in NED frame
 
+      // Convert attitude from VICON_XYZ frame to NED frame
+      pitch = -pitch;
+      yaw = -yaw;
+
       curT = hrt_absolute_time(); // Get current timestamp
 
       // Calculate velocity AFTER first pass

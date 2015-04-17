@@ -12,7 +12,7 @@
 ### MODIFIED FILES ###
 
 ### FIRST-TIME GIT SETUP ###
-	* See [complete details](https://pixhawk.org/dev/nuttx/building_and_flashing_console) on the Pixhawk website
+* See [complete details](https://pixhawk.org/dev/nuttx/building_and_flashing_console) on the Pixhawk website
 	* <pre>
 	  <code> 
 	  cd /path/to/Firmware
