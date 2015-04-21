@@ -1,15 +1,22 @@
 ## Pixhawk Firmware Mods for Vicon Position Control ##
 
 ### ADDED FILES ###
-* src/modules/vicon_receiver/vicon_receiver.c
-	* Custom app to receive vicon data via XBee on Serial 5
-	* In the future, will use mavlink. Sample code for starting mavlink on SERIAL4 (see [mavlink](https://pixhawk.org/firmware/apps/mavlink) for more details):
-    	* <code>mavlink stream -d /dev/ttyS6 -s CUSTOM_STREAM_NAME -r 50</code>
+* src/modules/vicon_receiver/vicon_receiver.cpp
+	* Custom app to receive Vicon pose data via XBee on SERIAL5
+		* In the future, will use mavlink. Sample code for starting mavlink on SERIAL4 (see [mavlink](https://pixhawk.org/firmware/apps/mavlink) for more details):
+			* <code>mavlink stream -d /dev/ttyS6 -s CUSTOM_STREAM_NAME -r 50</code>
+	* Calculates velocity using backward difference approximation
+	* Publishes the vision_position_estimate topic
+	* NOTE that the main function must be preceded by <code>extern "C"</code> to link properly
+		* This is because the app is written in C++, unlike several of the example apps which use C
 * src/modules/vicon_receiver/modules.mk
 	* Makefile to build vicon_receiver code
 	* Based off of ‘modules.mk’ files in the other apps in src/modules
 
 ### MODIFIED FILES ###
+* makefiles/config_px4fmu-v2_default.mk
+	* Register the custom 'vicon_receiver' application in NuttShell:
+		* <code>MODULES += modules/vicon_receiver</code>
 
 ### FIRST-TIME GIT SETUP ###
 * See [complete details](https://pixhawk.org/dev/nuttx/building_and_flashing_console) on the Pixhawk website
