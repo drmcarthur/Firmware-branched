@@ -32,7 +32,7 @@
  ****************************************************************************/
  
 /** 
- * @file vicon_receiver.c
+ * @file vicon_receiver.cpp
  * 
  * Receives Vicon position/attitude data through SERIAL 5.
  *
@@ -47,16 +47,17 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+#include <mathlib/mathlib.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/vision_position_estimate.h>
 #include <drivers/drv_hrt.h>
 
-__EXPORT int vicon_receiver_main(int argc, char *argv[]);
+extern "C" __EXPORT int vicon_receiver_main(int argc, char *argv[]);
 
 int vicon_receiver_main(int argc, char *argv[])
 {
   // Publish Vicon Position in vision_position_estimate topic
-  struct vision_position_position_s vicon_position;
+  struct vision_position_estimate vicon_position;
   memset(&vicon_position, 0, sizeof(vicon_position));
   int vicon_pub_fd = 0;
 
@@ -86,8 +87,8 @@ int vicon_receiver_main(int argc, char *argv[])
   // DEBUG Velocity calculations (make sure have good Hz)
   uint64_t lastCheck = hrt_absolute_time();
   uint64_t thisCheck = hrt_absolute_time();
-  int loopCount = 0;
-  int xCount = 0;
+  int loopCount = 0;    // Count
+  int xCount = 0;       // Count # of times x-velocity exceeded threshold
   int yCount = 0;
   int zCount = 0;
 
@@ -97,7 +98,7 @@ int vicon_receiver_main(int argc, char *argv[])
     // Read from serial 5 port (get Vicon data through XBee)
     gets(buffer);
 
-    // DEBUG - Print out 
+    // DEBUG - Print # of times valid position received in last 5 seconds
     thisCheck = hrt_absolute_time();
     if((thisCheck - lastCheck) > 5000000) // update every 5 seconds
     {
@@ -113,25 +114,30 @@ int vicon_receiver_main(int argc, char *argv[])
     // ************* Check for initialization message: 'BEGIN' *************
     if(strcmp(buffer,"BEGIN") == 0)
     {
-      //printf("%s\n",buffer);  // Establish 1st communication
+      printf("PXK: %s\n",buffer);  // Establish 1st communication
       continue;
     }
     else if(strcmp(buffer,"NODATA") == 0)
     {
       //printf("NO DATA!\n");
-      continue;        // Ignore packets with no useful data
+      continue;        // Ignore packets with no useful position data
     }
     else
     {
-      // Parse Vicon/GPS data from XBee into variables
+      // OLD: Parse Vicon/GPS data from XBee into variables
       //scanCheck = sscanf(buffer,"%c,%ld,%ld,%ld,%f,%f,%f",
       //        &id,&lat,&lon,&alt,&x,&y,&yaw); // Read gps/vicon coordinates
 
       // Parse Vicon data from XBee into variables
       scanCheck = sscanf(buffer,"%c,%f,%f,%f,%f,%f,%f",
-              &id,&x,&y,%z,&roll,&pitch,&yaw); // Read vicon coordinates
+                          &id,&x,&y,&z,&roll,&pitch,&yaw); // Read vicon coordinates
 
-      //DEBUG - return original
+      //DEBUG - return original packet
+      //printf("PXK: %1c,%5.0f,%5.0f,%5.0f,%6.3f,%6.3f,%6.3f\n",
+      //        id,(double)x,(double)y,(double)z,
+      //        (double)roll,(double)pitch,(double)yaw);
+
+      // OLD packet
       //printf("%1c,%11ld,%11ld,%5ld,%6.3f,%6.3f,%6.3f,%6.3f\n",
       //    id,lat,lon,alt,(double)x,(double)y,(double)z,(double)yaw);
 
@@ -148,7 +154,7 @@ int vicon_receiver_main(int argc, char *argv[])
       }
 
       //DEBUG
-      loopCount++;  // Count how many valid data points received
+      loopCount++;  // Count how many valid positions received
 
       //DEBUG - Validate input from sscanf
       float maxPos = 7000;  // will never be more than 7 meters from center
@@ -237,7 +243,7 @@ int vicon_receiver_main(int argc, char *argv[])
       prevZ = z;
 
       // Use the component ID to identify the vision sensor
-      vicon_position.id = unsigned int 123; // A BOGUS ID
+      vicon_position.id = (unsigned int) 123; // A BOGUS ID
 
       // Not sure what the difference is between timestamps
       vicon_position.timestamp_boot = hrt_absolute_time(); // Synced time

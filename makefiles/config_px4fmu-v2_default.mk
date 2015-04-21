@@ -138,6 +138,12 @@ MODULES		+= examples/rover_steering_control
 # Demo apps
 #
 #MODULES		+= examples/math_demo
+
+#
+# Custom apps
+#
+MODULES		+= modules/vicon_receiver
+
 # Tutorial code from
 # https://pixhawk.ethz.ch/px4/dev/hello_sky
 #MODULES		+= examples/px4_simple_app
